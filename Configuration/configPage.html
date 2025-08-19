@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Jellyzam Configuration</title>
+</head>
+<body>
+    <div id="JellyzamConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox,emby-select">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="JellyzamConfigForm">
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtShazamApiKey">Shazam API Key:</label>
+                        <input is="emby-input" type="password" id="txtShazamApiKey" name="ShazamApiKey" />
+                        <div class="fieldDescription">
+                            Enter your Shazam API key. You can get one from RapidAPI.
+                        </div>
+                    </div>
+                    
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkAutoIdentify" name="AutoIdentifyUnknownTracks" />
+                            <span>Automatically identify unknown tracks</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            When enabled, the plugin will automatically attempt to identify tracks with missing metadata.
+                        </div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtConfidenceThreshold">Confidence Threshold:</label>
+                        <input is="emby-input" type="number" id="txtConfidenceThreshold" name="ConfidenceThreshold" min="0" max="1" step="0.1" />
+                        <div class="fieldDescription">
+                            Minimum confidence level (0.0 - 1.0) required to accept Shazam identification results.
+                        </div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkOverwriteMetadata" name="OverwriteExistingMetadata" />
+                            <span>Overwrite existing metadata</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            When enabled, Shazam results will overwrite existing track metadata.
+                        </div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkOrganizeFiles" name="OrganizeFiles" />
+                            <span>Organize files into artist/album folders</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            When enabled, files will be moved to organized folder structure: Artist/Album/Song.ext
+                        </div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="txtOrganizedPath">Organized music folder path:</label>
+                        <input is="emby-input" type="text" id="txtOrganizedPath" name="OrganizedMusicPath" />
+                        <div class="fieldDescription">
+                            Base path where organized music will be stored (leave empty to use current library path).
+                        </div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkRunInitialScan" name="RunInitialScan" />
+                            <span>Run initial full library scan</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">
+                            Automatically scan and organize entire music library on first run.
+                        </div>
+                    </div>
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            var pluginId = "12345678-1234-5678-9012-123456789012";
+
+            function loadPage() {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    document.querySelector('#txtShazamApiKey').value = config.ShazamApiKey || '';
+                    document.querySelector('#chkAutoIdentify').checked = config.AutoIdentifyUnknownTracks || false;
+                    document.querySelector('#txtConfidenceThreshold').value = config.ConfidenceThreshold || 0.8;
+                    document.querySelector('#chkOverwriteMetadata').checked = config.OverwriteExistingMetadata || false;
+                    document.querySelector('#chkOrganizeFiles').checked = config.OrganizeFiles !== undefined ? config.OrganizeFiles : true;
+                    document.querySelector('#txtOrganizedPath').value = config.OrganizedMusicPath || '';
+                    document.querySelector('#chkRunInitialScan').checked = config.RunInitialScan !== undefined ? config.RunInitialScan : true;
+                    Dashboard.hideLoadingMsg();
+                });
+            }
+
+            function savePage() {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    config.ShazamApiKey = document.querySelector('#txtShazamApiKey').value;
+                    config.AutoIdentifyUnknownTracks = document.querySelector('#chkAutoIdentify').checked;
+                    config.ConfidenceThreshold = parseFloat(document.querySelector('#txtConfidenceThreshold').value);
+                    config.OverwriteExistingMetadata = document.querySelector('#chkOverwriteMetadata').checked;
+                    config.OrganizeFiles = document.querySelector('#chkOrganizeFiles').checked;
+                    config.OrganizedMusicPath = document.querySelector('#txtOrganizedPath').value;
+                    config.RunInitialScan = document.querySelector('#chkRunInitialScan').checked;
+                    
+                    ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
+                });
+            }
+
+            document.querySelector('#JellyzamConfigForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                savePage();
+                return false;
+            });
+
+            document.addEventListener('pageshow', function() {
+                if (window.location.href.indexOf('JellyzamConfigPage') !== -1) {
+                    loadPage();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
