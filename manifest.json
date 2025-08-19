@@ -8,7 +8,7 @@
   "imageUrl": "",
   "version": "1.0.0.0",
   "changelog": "Initial release with Shazam integration and automatic music identification",
-  "targetAbi": "10.9.0.0",
+  "targetAbi": "10.8.0.0",
   "sourceUrl": "https://github.com/yourusername/jellyzam",
   "checksum": "",
   "timestamp": "2025-08-19T00:00:00.0000000Z"
